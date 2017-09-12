@@ -1,0 +1,1873 @@
+                                                                                                           I
+http://www.tldp.org/LDP/abs/html/ (advance scripting)
+
+echo $? 9check 0 or 1
+
+
+#!/bin/bash
+
+declare -a ARRAY
+
+ARRAY[0]=2
+ARRAY[1]=4
+ARRAY[2]=6
+ARRAY[3]=9
+
+index=2
+pub=5
+
+echo $[${ARRAY[$index]}+$pub]
+
+
+ root@network vagrant]# NEWARRAY=("FIRST" "second" "third")
+[root@network vagrant]# echo ${NEWARRAY[0]}
+
+#
+
+———————————————————————————————:
+Positional parameters
+
+#!/bin/bash
+echo "enter the file name to move:"
+read file
+mv /tmp/$file /tmp/test1
+cat /tmp/test1
+
+
+##############################################################################
+
+AND Operator && or -a 
+
+echo “Enter the two number 30 to 100:\c”
+read num
+if [ $num -le 100 -a $num -ge 50 ]
+then
+    echo “You’re in limit”
+else
+     echo “your out of limit”
+
+
+fi
+##############################################################################
+
+OR Operator will pass until 1 statement is tree
+
+
+##############################################################################
+
+
+
+echo "Hi How r u doing ? \"Thats great am fine\""  (line enter)
+
+##############################################################################
+
+
+
+
+
+Count user input
+
+echo “Enter a character :\c”
+read var
+if [ ‘echo $var |wc -c’ -eq 2]; then
+ 
+   
+      echo “You’re enter character”
+
+else
+
+      echo “Invalid input”
+
+fi
+
+
+##############################################################################
+
+———————————————————
+adding numbers
+
+#!/bin/bash
+echo "Enter first number :"
+read first
+
+echo "Enter second number : "
+read second
+
+echo "Enter third number :"
+read third
+
+AVERAGE="$(((first + second + third) /3))"
+echo "total value is $AVERAGE
+
+
+———————————————————
+#!/bin/bash
+
+BIRTHDATE="MAY 10 1985"
+Presents=11
+Birday="Monday"
+
+if [ "$BIRTHDATE" == "MAY 11 1985" ] ; then
+   echo "$BIRTHDATE is correct"
+else 
+   echo "$BIRTHDATE is incorrect-please verify"
+fi
+
+if [ "$Presents" == 10 ] ; then
+   echo "$Presents is correct"
+else
+   echo "$Presents is incorrrect"
+
+fi
+
+if [ "$Birday" == "Monday" ] ; then
+   echo "$Birday its correct"
+else
+   echo "$Birday is wrong"
+fi    
+
+
+———————————————————
+
+echo -e "Hello saif, \n howw r u ?"
+
+———————————————————
+
+
+if statement.
+
+
+#!/bin/bash
+echo "Enter the two files :"
+
+read source destination
+
+if mv $source $destination
+
+ then
+
+echo "file copied sucessfully:"
+fi
+
+——————————————— (http://www.thegeekstuff.com/2010/06/bash-conditional-expression/)
+else if statement
+
+#!/bin/bash
+echo "Enter the 2 number in between 50 to 90 :"
+
+read num
+
+if [ $num -lt 50 ] ; then
+ echo "number lower then 50"
+
+elif [ $num -gt 90 ] ; then
+
+ echo "number is greater the 90"
+
+else
+
+echo "within number in 50 to 90"
+
+fi
+——————————————————
+
+
+#!/bin/bash
+#This is 2 integer equal,greater then
+
+echo "Enter the first number :"
+read first
+echo "Enter the second number :"
+read second
+
+if [ $first -eq 0 ] && [ $second -eq 0] ; then
+  echo "First and Second equal to zero"
+elif [ $first -eq $second ] ; then
+  echo "both values are same"
+elif [ $first -gt $second ]; then
+  echo "$first is greater then $second"
+else
+  echo "$first is lower then $second"
+
+fi
+
+——————————
+checks files number
+
+!/bin/bash
+c
+read file
+
+if [ -d $file ]; then
+
+ echo "file is exist"
+
+else
+
+ echo "file does not exist"
+
+ fi
+
+
+-f (file)
+
+-d (director)
+
+-b (block) etc
+————————————
+string checks
+
+#!/bin/bash
+
+str1="How are you buddy"
+str2="How's life"
+str3=""
+
+[ "$str1" = "$str2" ]
+echo $?
+
+
+[ "$str1" != "$str2" ]
+
+echo $?
+
+-n (Means length)
+~                
+
+- - - - - - - - - - - - - — - - 
+
+
+AND operator
+
+
+#!/bin/bash
+
+echo -e "Enter the number between 50 and 90:\c"
+
+read num
+
+if [ $num -ge 50 -a $num -le 90 ] (-a and both the statement should be true)
+
+then
+
+echo "youre in limit"
+
+else
+
+echo "over limit"
+
+fi
+
+
+- - - - - - - - - - - - - — - - 
+
+$0 	The filename of the current script.
+$n 	These variables correspond to the arguments with which a script was invoked. Here n is a positive decimal number corresponding to the position of an argument (the first argument is $1, the second argument is $2, and so on).
+$# 	The number of arguments supplied to a script.
+$* 	All the arguments are double quoted. If a script receives two arguments, $* is equivalent to $1 $2.
+$@ 	All the arguments are individually double quoted. If a script receives two arguments, $@ is equivalent to $1 $2.
+$? 	The exit status of the last command executed.
+$$ 	The process number of the current shell. For shell scripts, this is the process ID under which they are executing.
+$! 	The process number of the last background command.
+
+
+
+
+- - - - - - - - - - - - - — - - 
+
+
+
+PATH=$PATH:{$HOME}/bin
+
+
+
+- - - - - - - - - - - - - — - - 
+while
+
+#!/bin/bash
+i="1"
+while [ $i -le 5 ]
+do
+ echo $i
+i=$[$i+1]
+done
+
+—————
+
+
+!/bin/bash
+if [ $# -eq 0 ]
+then
+echo "Error Argument is missing"
+exit 1
+fi
+
+n=$1
+i=1
+while [$i -le 10]
+do
+echo "$n * $i = 'expr $i \* $n'"
+i='expr $i + 1'
+done
+
+—————————————————
+
+9.2.2.2. Nested while loops
+
+The example below was written to copy pictures that are made with a webcam to a web directory. Every five minutes a picture is taken. Every hour, a new directory is created, holding the images for that hour. Every day, a new directory is created containing 24 subdirectories. The script runs in the background.
+
+
+#!/bin/bash
+
+# This script copies files from my homedirectory into the webserver directory.
+# (use scp and SSH keys for a remote directory)
+# A new directory is created every hour.
+
+PICSDIR=/home/carol/pics
+WEBDIR=/var/www/carol/webcam
+
+while true; do 
+	DATE=`date +%Y%m%d`
+	HOUR=`date +%H`
+	mkdir $WEBDIR/"$DATE"
+	
+	while [ $HOUR -ne "00" ]; do 
+		DESTDIR=$WEBDIR/"$DATE"/"$HOUR"
+		mkdir "$DESTDIR"
+		mv $PICDIR/*.jpg "$DESTDIR"/
+		sleep 3600
+		HOUR=`date +%H`
+	done
+done
+
+
+—————————————————
+
+
+ w | cut -d " " -f1 |grep -v USER| sort -u
+
+
+—————————————————
+
+
+
+!/bin/bash
+                                                                                                 
+# This script makes a backup of my home directory.
+
+# Change the values of the variables to make the script work for you:
+BACKUPDIR=/home
+BACKUPFILES=franky
+TARFILE=/var/tmp/home_franky.tar
+BZIPFILE=/var/tmp/home_franky.tar.bz2
+SERVER=bordeaux
+REMOTEDIR=/opt/backup/franky
+LOGFILE=/home/franky/log/home_backup.log
+
+cd $BACKUPDIR
+
+# This creates the archive
+tar cf $TARFILE $BACKUPFILES > /dev/null 2>&1
+                                                                                                 
+# First remove the old bzip2 file.  Redirect errors because this generates some if the archive 
+# does not exist.  Then create a new compressed file.
+rm $BZIPFILE 2> /dev/null
+bzip2 $TARFILE
+
+# Copy the file to another host - we have ssh keys for making this work without intervention.
+scp $BZIPFILE $SERVER:$REMOTEDIR > /dev/null 2>&1
+
+# Create a timestamp in a logfile.
+date >> $LOGFILE
+echo backup succeeded >> $LOGFILE
+
+
+
+——————
+
+/scratch existance
+
+#!/bin/bash
+if [ "$(df -kh |awk '{print $6 }'|grep /scratch &>/dev/null; echo $?)" == 0 ]; then
+
+echo "already /scratch is mounted"
+
+elif [ "$(/usr/local/bin/NodeValidation.sh | grep 'Scratch' &>/dev/null; echo $?)" == 0 ]; then
+
+mmmount /scratch
+
+echo "scratch mounting...[Wait]:"
+
+else
+
+echo "mounting not sucess:"
+
+ fi
+
+
+
+
+———————————————————
+
+!/bin/bash
+echo -e “Enter the user name :\c”
+read user
+if grep "^$USER" /etc/passwd &> /dev/null; then
+  
+    echo "$USER is local user on the system."
+
+ else 
+
+   echo "$USER is not local user."
+fi
+——————————————————
+#!/bin/bash
+if test “$USER” != ‘root’ ; then
+
+echo “you’re not login as root”
+fi
+——————————————
+
+#!/bin/bash
+
+if [ $(id -u) -lt 9 ]; then
+
+echo “$(id -u) less then 9 check it”
+fi
+
+————————————————————————(translator)
+#!/bin/bash
+echo -n 'Enter yes or no: '
+read answer
+answer="$( echo $answer | tr 'A-Z' 'a-z')"
+
+
+—————————————————————————
+adding user
+
+!/bin/bash
+for i in $(cat /var/tmp/userlist.txt)
+do
+  echo "removing user $i"
+  userdel -r $i
+done
+
+—————————————————————————
+
+while read message
+ doecho $message sleep 1datedone < /etc/motd
+———————————————————————————
+
+$! background process ID
+
+——————————————————————————————————————————————
+
+ sh -x x.sh+ echo Hello, world! Hello, world!+ [ 0 -eq 0 ]+ echo Hurray, it worked! Hurray, it worked!$
+———————————————————————————————————————————————
+echo "Hi How r u doing ? \"Thats great am fine\""
+
+Hi How r u doing ? "Thats great am fine"
+
+——————————————————————————————————————————————
+example:
+
+franky ~> export PATH="$PATH:~/testdir"
+~/testdir will be expanded to $HOME/testdir, so if $HOME is /var/home/franky, the directory /var/home/franky/testdir will be added to the content of the PATH variable
+
+——————————————————————————————————————————————
+
+ grep '\<c...h\>' /usr/share/dict/words
+catch
+clash
+cloth
+coach
+couch
+cough
+crash
+crush
+
+grep '\<c.*h\>' /usr/share/dict/words
+caliph
+cash
+catch
+cheesecloth
+cheetah
+
+——————————————————————————————————————————————
+
+cat -n example
+     1  This is the first line of an example text.
+     2  It is a text with erors.
+
+——————————————————————————————————————————————
+sed  '/erors/p' example
+This is the first line of an example text.
+It is a text with erors.
+It is a text with erors.
+
+
+——————————————————————————————————————————————
+
+
+As you notice, sed prints the entire file, but the lines containing the search string are printed twice. This is not what we want. der to only print those lines matching our pattern, use the -n option:
+
+sandy ~> sed -n '/erors/p' example
+It is a text with erors.
+Lots of erors.
+So much erors, all these erors are making me sick
+
+——————————————————————————————————————————————
+
+
+#sed '2,4d' example
+
+
+to print the file starting from a certain line until the end of the file, use a command similar to this:
+
+#sed '3,$d' example
+This is the first line of an example text.
+It is a text with erors.
+
+
+o insert a string at the beginning of each line of a file, for instance for quoting:
+
+# sed 's/^/> /' example
+> This is the first line of an example text.
+> It is a text with erors.
+
+insert some string at the end of each line:
+
+# sed 's/$/EOL/' example
+This is the first line of an example text.EOL
+It is a text with erors.EOL
+
+
+Multiple find and replace commands are separated with individual -e options:
+
+# sed -e 's/erors/errors/g' -e 's/last/final/g' example
+This is the first line of an example text.
+——————————————————————————————————————————————
+
+ls -ldh * |grep -v total | awk '{ print "Size of file is " $5 "  bytes is " $9 }'
+
+Size of file is 165B  bytes is AND.sh
+Size of file is 0B  bytes is animationperfd_Generic_DEBUG.txt
+Size of file is 121B  bytes is array1.sh
+Size of file is 199B  bytes is checks_files.sh
+Size of file is 82B  bytes is count.sh
+Size of file is 233B  bytes is else_if.sh
+Size of file is 63B  bytes is expr.sh
+
+——————————————————————————————————————————————
+
+df -h | sort -rnk 5 | head -3 | \ 
+awk '{ print "Partition " $6 "\t: " $5 " full!" }'
+Partition /var  : 86% full!
+Partition /usr  : 85% full!
+Partition /home : 70% full!
+
+
+ls -l | awk '/\<(a|x).*\.conf$/ { print $9 }'
+amd.conf
+antivir.conf
+xcdroast.conf
+xinetd.conf
+
+ls -l | awk 'BEGIN { print "Files found:\n" } /\<[a|x].*\.conf$/ { print $9 }'
+
+Files found:
+amd.conf
+antivir.conf
+xcdroast.conf
+xinetd.conf
+
+#
+#ls -l | \
+awk '/\<[a|x].*\.conf$/ { print $9 } END { print \
+"Can I do anything else for you, mistress?" }'
+amd.conf
+antivir.conf
+xcdroast.conf
+xinetd.conf
+Can I do anything else for you, mistress?
+
+
+
+# cat diskrep.awk
+BEGIN { print "*** WARNING WARNING WARNING ***" }
+/\<[8|9][0-9]%/ { print "Partition " $6 "\t: " $5 " full!" }
+END { print "*** Give money for new disks URGENTLY! ***" }
+
+
+
+#awk 'BEGIN { FS=":" } { print $1 "\t" $5 }' /etc/passwd
+--output omitted--
+kelly	Kelly Smith
+franky	Franky B.
+eddy	Eddy White
+willy	William Black
+cathy	Catherine the Great
+sandy	Sandy Li Wong
+
+
+#$ cat etc_passwd.awk
+BEGIN{
+FS=":";
+print "Name\tUserID\tGroupID\tHomeDirectory";
+}
+{
+	print $1"\t"$3"\t"$4"\t"$6;
+}
+END {
+	print NR,"Records Processed";
+}
+
+$awk -f etc_passwd.awk /etc/passwd
+
+
+#$ awk -F':' '{print $3,$4;}' /etc/passwd
+41 41
+100 101
+101 102
+
+
+#awk -F':' 'BEGIN{OFS="=";} {print $3,$4;}' /etc/passwd
+41=41
+100=101
+101=102
+103=7
+105=111
+
+
+——————————————————————————————————————————————
+
+#cut -d':' -f1 /etc/passwd
+root
+daemon
+bin
+
+#grep "/bin/bash" /etc/passwd | cut -d':' -f1,6
+root:/root
+bala:/home/bala
+
+
+ps axu | grep python | sed 's/\s\+/ /g' | cut -d' ' -f2,11-
+2231 /usr/bin/python /usr/lib/unity-lens-video/unity-lens-video
+2311 /usr/bin/python /usr/lib/unity-scope-video-remote/unity-scope-video-remote
+2414 /usr/bin/python /usr/lib/ubuntuone-client/ubuntuone-syncdaemon
+2463 /usr/bin/python /usr/lib/system-service/system-service-d
+
+
+
+
+——————————————————————————————————————————————
+
+
+
+Primary	Meaning
+[ -a FILE ]	True if FILE exists.
+[ -b FILE ]	True if FILE exists and is a block-special file.
+[ -c FILE ]	True if FILE exists and is a character-special file.
+[ -d FILE ]	True if FILE exists and is a directory.
+[ -e FILE ]	True if FILE exists.
+[ -f FILE ]	True if FILE exists and is a regular file.
+[ -g FILE ]	True if FILE exists and its SGID bit is set.
+[ -h FILE ]	True if FILE exists and is a symbolic link.
+[ -k FILE ]	True if FILE exists and its sticky bit is set.
+[ -p FILE ]	True if FILE exists and is a named pipe (FIFO).
+[ -r FILE ]	True if FILE exists and is readable.
+[ -s FILE ]	True if FILE exists and has a size greater than zero.
+[ -t FD ]	True if file descriptor FD is open and refers to a terminal.
+[ -u FILE ]	True if FILE exists and its SUID (set user ID) bit is set.
+[ -w FILE ]	True if FILE exists and is writable.
+[ -x FILE ]	True if FILE exists and is executable.
+[ -O FILE ]	True if FILE exists and is owned by the effective user ID.
+[ -G FILE ]	True if FILE exists and is owned by the effective group ID.
+[ -L FILE ]	True if FILE exists and is a symbolic link.
+[ -N FILE ]	True if FILE exists and has been modified since it was last read.
+[ -S FILE ]	True if FILE exists and is a socket.
+[ FILE1 -nt FILE2 ]	True if FILE1 has been changed more recently than FILE2, or if FILE1 exists and FILE2 does not.
+[ FILE1 -ot FILE2 ]	True if FILE1 is older than FILE2, or is FILE2 exists and FILE1 does not.
+[ FILE1 -ef FILE2 ]	True if FILE1 and FILE2 refer to the same device and inode numbers.
+[ -o OPTIONNAME ]	True if shell option "OPTIONNAME" is enabled.
+[ -z STRING ]	True of the length if "STRING" is zero.
+[ -n STRING ] or [ STRING ]	True if the length of "STRING" is non-zero.
+[ STRING1 == STRING2 ]	True if the strings are equal. "=" may be used instead of "==" for strict POSIX compliance.
+[ STRING1 != STRING2 ]	True if the strings are not equal.
+[ STRING1 < STRING2 ]	True if "STRING1" sorts before "STRING2" lexicographically in the current locale.
+[ STRING1 > STRING2 ]	True if "STRING1" sorts after "STRING2" lexicographically in the current locale.
+[ ARG1 OP ARG2 ]	"OP" is one of -eq, -ne, -lt, -le, -gt or -ge. These arithmetic binary operators return true if "ARG1" is equal to, not equal to, less than, less than or equal to, greater than, or greater than or equal to "ARG2", respectively. "ARG1" and "ARG2" are integers.
+Expressions may be combined using the following operators, listed in decreasing order of precedence:
+
+Table 7-2. Combining expressions
+
+Operation	Effect
+[ ! EXPR ]	True if EXPR is false.
+[ ( EXPR ) ]	Returns the value of EXPR. This may be used to override the normal precedence of operators.
+[ EXPR1 -a EXPR2 ]	True if both EXPR1 and EXPR2 are true.
+[ EXPR1 -o EXPR2 ]	True if either EXPR1 or EXPR2 is true.
+
+
+cat msgcheck.sh
+#!/bin/bash
+
+echo "This scripts checks the existence of the messages file."
+echo "Checking..."
+if [ -f /var/log/messages ]
+  then
+    echo "/var/log/messages exists."
+fi
+echo
+echo "...done."
+
+
+
+hese lines will print a message if the noclobber option is set:
+
+if [ -o noclobber ]
+  then
+	echo "Your files are protected against accidental overwriting using redirection."
+fi
+
+
+grep $USER /etc/passwd
+
+ if [ $? -ne 0 ] ; then 
+echo "not a local account" ; 
+fi
+not a local account
+
+
+
+#num=`wc -l work.txt`
+echo $num
+201
+
+# if [ "$num" -gt "150" ]
+More input> then echo ; echo "you've worked hard enough for today."
+More input> echo ; fi
+
+you've worked hard enough for today.
+
+
+
+
+#!/bin/bash
+if [ -z “$BASH_VERSION” ]; then 
+echo “This is not really Bash”
+else
+echo “Yes, we are running under Bash – version $BASH_VERSION”
+fi
+
+
+
+#!/bin/bash
+echo -e "Enter the two files :\c"
+
+read file
+
+if [ -d $file ]; then
+
+echo "File is exist"
+
+  else 
+
+echo "file does not exist"
+
+fi
+
+
+
+
+
+#!/bin/bash
+if [ "$(whoami)" != 'root' ];
+then
+      echo "you have no permission to run as $0 as non root user."
+      exit 1;
+fi
+
+
+[ "$(whoami)" != 'root' ] && ( echo you are using a non-privileged account; exit 1 )
+
+
+
+
+cat weight.sh
+#!/bin/bash
+
+# This script prints a message about your weight if you give it your
+# weight in kilos and height in centimeters.
+
+weight="$1"
+height="$2"
+idealweight=$[$height - 110]
+
+if [ $weight -le $idealweight ] ; then
+  echo "You should eat a bit more fat."
+else
+  echo "You should eat a bit more fruit."
+fi
+
+
+
+
+#/bin/bash
+
+# This script prints a message about your weight if you give it your
+# weight in kilos and height in centimeters.
+
+if [ ! $# == 2 ]; then
+  echo "Usage: $0 weight_in_kilos length_in_centimeters"
+  exit
+fi
+
+weight="$1"
+height="$2"
+idealweight=$[$height - 110]
+
+if [ $weight -le $idealweight ] ; then
+  echo "You should eat a bit more fat."
+else
+  echo "You should eat a bit more fruit."
+fi
+
+
+
+
+cat disktest.sh
+#!/bin/bash
+
+# This script does a very simple test for checking disk space.
+
+space=`df -h | awk '{print $5}' | grep % | grep -v Use | sort -n | tail -1 | cut -d "%" -f1 -`
+alertvalue="80"
+
+if [ "$space" -ge "$alertvalue" ]; then
+  echo "At least one of my disks is nearly full!" | mail -s "daily diskcheck" root
+else
+  echo "Disk space normal" | mail -s "daily diskcheck" root
+
+
+
+
+
+#!/bin/bash
+echo -e "Enter file name:\c"
+
+read file
+
+    if [ -f $file ] 
+
+ then
+
+     if [ -w $file ] 
+
+ then
+
+    echo "enter comment"
+
+     cat >> $file
+
+else
+
+     echo "you dont have write acess permission"
+
+   fi
+fi
+
+
+
+##!/bin/bash
+echo "Enter the 2 number in between 50 to 90 :"
+
+read num
+
+if [ $num -lt 50 ] ; then
+ echo "number lower then 50"
+
+elif [ $num -gt 90 ] ; then
+
+ echo "number is greater the 90"
+
+else
+
+echo "within number in 50 to 90"
+
+fi
+
+
+###!/bin/bash
+echo "Enter the two files :"
+
+read source destination
+
+ if mv $source $destination
+
+  then
+
+ echo "file copied sucessfully:"
+ 
+  else
+
+ cat /etc/hosts
+
+ echo "This is ouput of /etc/hosts"
+
+fi
+
+
+
+############################################################
+!/bin/bash
+
+
+ case "$1" in
+ 'start')
+         echo "Starting apache services"
+
+  /etc/init.d/httpd start
+ ;;
+
+
+ 'stop')
+         echo "Stoping apache services"
+
+  /etc/init.d/httpd stop
+
+ ;;
+
+ 'restart')
+
+  echo "Usage : $0 [start|stop]"
+;;
+
+esac
+
+############################################################
+
+
+$ cat yorno.sh
+#!/bin/bash
+
+echo -n "Do you agree with this? [yes or no]: "
+read yno
+case $yno in
+
+        [yY] | [yY][Ee][Ss] )
+                echo "Agreed"
+                ;;
+
+        [nN] | [n|N][O|o] )
+                echo "Not agreed, you can't proceed the installation";
+                exit 1
+                ;;
+        *) echo "Invalid input"
+            ;;
+esac
+
+$ ./yorno.sh
+Do you agree with this? [yes or no]: YES
+Agreed
+
+############################################################
+
+
+
+Escape sequences used by the echo command
+Sequence	Meaning
+\a	Alert (bell).
+\b	Backspace.
+\c	Suppress trailing newline.
+\e	Escape.
+\f	Form feed.
+\n	Newline.
+\r	Carriage return.
+\t	Horizontal tab.
+\v	Vertical tab.
+\\	Backslash.
+\0NNN	The eight-bit character whose value is the octal value NNN (zero to three octal digits).
+\NNN	The eight-bit character whose value is the octal value NNN (one to three octal digits).
+\xHH	The eight-bit character whose value is the hexadecimal value (one or two hexadecimal digits).
+
+############################################################
+
+!/bin/bash
+if [ "$#" -ne "2" ]; then
+  echo -e "Usage of the feed script:\t$0 food-on-menu animal-name\n"
+  exit 1
+else
+
+   menu="$1"
+   animal="$2"
+
+ echo -e "Feeding $menu to $animal...\n" 
+
+fi
+
+feed $menu $animal
+
+result="$?"
+
+  echo -e "Done feeding.\n"
+
+case "$result" in
+
+  1)
+    echo -e "Guard: \"You'd better give'm a fish, less they get violent...\"\n"
+    ;;
+  2)
+    echo -e "Guard: \"No wonder they flee our planet...\"\n"
+    ;;
+  3)
+    echo -e "Guard: \"Buy the food that the Zoo provides at the entry, you ***\"\n"
+    echo -e "Guard: \"You want to poison them, do you?\"\n"
+    ;;
+  *)
+    echo -e "Guard: \"Don't forget the guide!\"\n"
+    ;;
+  esac
+
+fi
+
+echo "Leaving..."
+echo -e "\a\a\aThanks for visiting the Zoo, hope to see you again soon!\n"
+
+michel ~/test> feed.sh apple camel
+Feeding apple to camel...
+
+Will you read this sign?!  Don't feed the camels!
+
+Done feeding.
+
+Guard: "Buy the food that the Zoo provides at the entry, you ***"
+
+Guard: "You want to poison them, do you?"
+
+Leaving...
+Thanks for visiting the Zoo, hope to see you again soon!
+
+
+############################################################
+
+he following example shows how you can use prompts to explain what the user should enter.
+
+
+michel ~/test> cat friends.sh
+#!/bin/bash
+
+# This is a program that keeps your address book up to date.
+
+friends="/var/tmp/michel/friends"
+
+echo "Hello, "$USER".  This script will register you in Michel's friends database."
+
+echo -n "Enter your name and press [ENTER]: "
+read name
+echo -n "Enter your gender and press [ENTER]: "
+read -n 1 gender
+echo
+
+grep -i "$name" "$friends"
+
+if  [ $? == 0 ]; then
+  echo "You are already registered, quitting."
+  exit 1
+elif [ "$gender" == "m" ]; then
+  echo "You are added to Michel's friends list."
+  exit 1
+else
+  echo -n "How old are you? "
+  read age
+  if [ $age -lt 25 ]; then
+    echo -n "Which colour of hair do you have? "
+    read colour
+    echo "$name $age $colour" >> "$friends" 
+    echo "You are added to Michel's friends list.  Thank you so much!"
+  else
+    echo "You are added to Michel's friends list."
+    exit 1
+  fi
+fi
+
+############################################################
+
+
+
+When redirecting errors, note that the order of precedence is significant. For example, this command, issued in /var/spool
+
+
+ls -l * 2> /var/tmp/unaccessible-in-spool
+
+will redirect standard output of the ls command to the file unaccessible-in-spool in /var/tmp. The command
+
+
+ls -l * > /var/tmp/spoollist 2>&1
+
+will direct both standard input and standard error to the file spoollist. The command
+
+
+ls -l * 2 >& 1 > /var/tmp/spoollist
+
+
+
+############################################################
+
+#!/bin/bash
+LIST="$(ls *.html)"
+for i in "$LIST"; do
+   NEWNAME=$(ls "$i" | sed -e 's/html/php/')
+   cat beginfile > "$NEWNAME"
+   cat "$i" | sed -e '1,25d' | tac | sed -e '1,21d'| tac >> "$NEWNAME"
+   cat endfile >> "$NEWNAME"
+done
+
+############################################################
+#!/bin/bash
+
+# This script copies files from my homedirectory into the webserver directory.
+# (use scp and SSH keys for a remote directory)
+# A new directory is created every hour.
+
+PICSDIR=/home/carol/pics
+WEBDIR=/var/www/carol/webcam
+
+while true; do 
+	DATE=`date +%Y%m%d`
+	HOUR=`date +%H`
+	mkdir $WEBDIR/"$DATE"
+	
+	while [ $HOUR -ne "00" ]; do 
+		DESTDIR=$WEBDIR/"$DATE"/"$HOUR"
+		mkdir "$DESTDIR"
+		mv $PICDIR/*.jpg "$DESTDIR"/
+		sleep 3600
+		HOUR=`date +%H`
+	done
+done
+
+############################################################
+
+
+
+#!/bin/bash
+
+# Calculate the average of a series of numbers.
+
+SCORE="0"
+AVERAGE="0"
+SUM="0"
+NUM="0"
+
+while true; do
+
+  echo -n "Enter your score [0-100%] ('q' for quit): "; read SCORE;
+
+  if (("$SCORE" < "0"))  || (("$SCORE" > "100")); then
+    echo "Be serious.  Common, try again: "
+  elif [ "$SCORE" == "q" ]; then
+    echo "Average rating: $AVERAGE%."
+    break
+  else
+    SUM=$[$SUM + $SCORE]
+    NUM=$[$NUM + 1]
+    AVERAGE=$[$SUM / $NUM]
+  fi
+
+done
+
+echo "Exiting."
+
+
+############################################################
+
+#!/bin/bash
+
+# This script copies files from my homedirectory into the webserver directory.
+# A new directory is created every hour.
+# If the pics are taking up too much space, the oldest are removed.
+
+while true; do 
+	DISKFUL=$(df -h $WEBDIR | grep -v File | awk '{print $5 }' | cut -d "%" -f1 -)
+
+	until [ $DISKFUL -ge "90" ]; do 
+
+        	DATE=`date +%Y%m%d`
+        	HOUR=`date +%H`
+        	mkdir $WEBDIR/"$DATE"
+                                                                                
+        	while [ $HOUR -ne "00" ]; do
+                	DESTDIR=$WEBDIR/"$DATE"/"$HOUR"
+                	mkdir "$DESTDIR"
+                	mv $PICDIR/*.jpg "$DESTDIR"/
+                	sleep 3600
+                	HOUR=`date +%H`
+        	done
+
+	DISKFULL=$(df -h $WEBDIR | grep -v File | awk '{ print $5 }' | cut -d "%" -f1 -)
+	done
+
+	TOREMOVE=$(find $WEBDIR -type d -a -mtime +30)
+	for i in $TOREMOVE; do
+		rm -rf "$i";
+	done
+
+done
+
+############################################################
+
+carol@octarine ~/test] cat tolower.sh
+#!/bin/bash
+
+# This script converts all file names containing upper case characters into file# names containing only lower cases.
+
+LIST="$(ls)"
+
+for name in "$LIST"; do
+
+if [[ "$name" != *[[:upper:]]* ]]; then
+continue
+fi
+
+ORIG="$name"
+NEW=`echo $name | tr 'A-Z' 'a-z'`
+
+mv "$ORIG" "$NEW"
+echo "new name for $ORIG is $NEW"
+done
+
+############################################################
+
+[carol@octarine testdir] cat private.sh
+#!/bin/bash
+
+echo "This script can make any of the files in this directory private."
+echo "Enter the number of the file you want to protect:"
+
+select FILENAME in *;
+do
+     echo "You picked $FILENAME ($REPLY), it is now only accessible to you."
+     chmod go-rwx "$FILENAME"
+done
+
+[carol@octarine testdir] ./private.sh
+This script can make any of the files in this directory private.
+Enter the number of the file you want to protect:
+1) archive-20030129
+2) bash
+3) private.sh
+#? 1
+You picked archive-20030129 (1)
+#?
+
+############################################################
+
+cat archiveoldstuff.sh
+#!/bin/bash
+
+# This script creates a subdirectory in the current directory, to which old
+# files are moved.
+# Might be something for cron (if slightly adapted) to execute weekly or 
+# monthly.
+
+ARCHIVENR=`date +%Y%m%d`
+DESTDIR="$PWD/archive-$ARCHIVENR"
+
+mkdir "$DESTDIR"
+
+# using quotes to catch file names containing spaces, using read -d for more 
+# fool-proof usage:
+find "$PWD" -type f -a -mtime +5 | while read -d $'\000' file
+
+do
+gzip "$file"; mv "$file".gz "$DESTDIR"
+echo "$file archived"
+done
+
+
+
+
+sing command substitution for specifying LIST items
+
+The first is a command line example, demonstrating the use of a for loop that makes a backup copy of each .xml file. After issuing the command, it is safe to start working on your sources:
+
+
+
+############################################################
+
+
+[carol@octarine ~/articles] ls *.xml
+file1.xml  file2.xml  file3.xml
+
+[carol@octarine ~/articles] ls *.xml > list
+
+[carol@octarine ~/articles] for i in `cat list`; do cp "$i" "$i".bak ; done
+
+[carol@octarine ~/articles] ls *.xml*
+file1.xml  file1.xml.bak  file2.xml  file2.xml.bak  file3.xml  file3.xml.bak
+
+
+
+
+!/bin/sh
+# This is some secure program that uses security.
+
+VALID_PASSWORD="secret" #this is our password.
+
+echo "Please enter the password:"
+read PASSWORD
+
+if [ "$PASSWORD" == "$VALID_PASSWORD" ]; then
+	echo "You have access!"
+else
+	echo "ACCESS DENIED!"
+fi
+
+############################################################
+
+
+Comparisons:
+-eq	equal to
+-ne	not equal to
+-lt	less than
+-le	less than or equal to
+-gt	greater than
+-ge	greater than or equal to
+
+File Operations:
+-s	file exists and is not empty
+-f	file exists and is not a directory
+-d	directory exists
+-x	file is executable
+-w	file is writable
+-r	file is readable
+
+
+############################################################
+
+#!/bin/bash
+if [  $(id -u)  -eq 0 ]; then
+
+    echo -e "Enter the user name :\c"
+    read user
+    read -s -p "Enter the password for  user $user : "
+
+    id $user 2&>1 /dev/null
+
+   if [ $? -eq 0 ]; then
+
+      echo "User already exist on ldap"
+
+    exit 1
+
+ else
+
+    pass=$(perl -e 'print crypt($ARGV[0], "passwd")' $passwd)
+
+    useradd -m -p $pass $user
+
+    [ $? -eq 0 ] && echo "User has been added to system!" || echo "User has been failed to added system!"
+fi
+
+ else
+
+  echo "Only root user can added to the system!"
+
+
+  exit 2
+
+fi
+
+
+############################################################
+
+date Command Syntax
+
+The syntax is as follows for GNU/date:
+
+date +"FORMAT"
+
+To display date in MONTH-DD-YYYY format use the date command as follows:
+$ date +"%b-%d-%y"
+
+Sample outputs:
+Feb-05-06
+
+Where, FORMAT can be any one of the following:
+
+    %a : Abbreviated weekday name (Sun..Sat)
+    %b : Abbreviated month name (Jan..Dec)
+    %B : Full month name, variable length (January..December)
+    %d : Day of month (01..31)
+    %e : Day of month, blank padded ( 1..31)
+    %m : Month (01..12)
+    %Y : Year
+    %d : Day of month (e.g, 01)
+    %H : 24 hour format (00..23)
+    %I : 12 hour format (01..12)
+    %j : day of year (001..366)
+    %D : date; same as %m/%d/%y
+    %F : full date; same as %Y-%m-%d (a good format for sorting filename)
+
+Get the date in YYYY-mm-dd format
+
+NOW=$(date +"%Y-%m-%d")
+
+OR
+
+NOW=$(date +"%F")
+
+To create a file with date in filename, enter:
+
+LOGFILE="log-$NOW.log"
+
+To display filename, enter:
+
+echo "$LOGFILE"
+
+Sample Shell Script
+
+#!/bin/sh
+# Dump MySQL database every hour using cron
+# Author: Vivek Gite 
+# See for more info: http://www.cyberciti.biz/tips/shell-scripting-creating-reportlog-file-names-with-date-in-filename.html
+# ---------------------------------------------------------------------------------------------------------
+ 
+## date format ##
+NOW=$(date +"%F")
+NOWT=$(date +”%T”) 
+## Backup path ##
+BAK="/nfs/backup/mysql/$NOW"
+ 
+## Login info ##
+MUSER="madmin"
+MPASS="PASSWORD"
+MHOST="127.0.0.1"
+ 
+## Binary path ##
+MYSQL="/usr/bin/mysql"
+MYSQLDUMP="/usr/bin/mysqldump"
+GZIP="/bin/gzip"
+ 
+## Get database list ##
+DBS="$($MYSQL -u $MUSER -h $MHOST -p$MPASS -Bse 'show databases')"
+ 
+## Use shell loop to backup each db ##
+for db in $DBS
+do
+ FILE="$BAK/mysql-$db-$NOWT.gz"
+ echo "$MYSQLDUMP -u $MUSER -h $MHOST -p$MPASS $db | $GZIP -9 > $FILE"
+done
+
+
+############################################################
+
+
+ You can also loop while reading a variable to make the code simpler. Let's try the above example revised:
+
+#!/bin/sh
+# Guess the number game.  Version 2.0
+
+ANSWER=5          # The correct answer
+
+echo "Guess a number between 1 and 10. "
+
+while read NUM
+do
+        # Validate the input...
+        if [ "$NUM" -lt 1 ] || [ "$NUM" -gt 10 ]; then
+                echo "The number must be between 1 and 10! Guess again. "
+        elif [ "$NUM" -eq "$ANSWER" ]; then
+                echo "You got the answer correct!"
+                exit
+        else
+                echo "Incorrect, guess again. "
+        fi 	
+UNIX & Linux Shell Scripting Tutorial
+
+    TOC
+    Introduction
+    Variables
+    If/Else
+    Looping
+    Cases
+    Functions
+    Files
+    Search & Sort
+    Advanced
+
+Looping
+
+While Loop
+
+The while statement is used when you want to loop while a statement is true. This is the same in many other programming and scripting languages. The body of the loop is put between do and done. Suppose that we want to write a script to have the user guess what number we are thinking of. The best way to use this would be to use a while loop.
+
+#!/bin/sh
+# Guess the number game.
+
+ANSWER=5          # The correct answer
+CORRECT=false     # The correct flag
+
+while [ "$CORRECT" != "true" ]
+do
+        # Ask the user for the number...
+        echo "Guess a number between 1 and 10. "
+        read NUM
+
+        # Validate the input...
+        if [ "$NUM" -lt 1 ] || [ "$NUM" -gt 10 ]; then
+                echo "The number must be between 1 and 10!"
+        elif [ "$NUM" -eq "$ANSWER" ]; then
+                echo "You got the answer correct!"
+                CORRECT=true
+        else
+                echo "Sorry, incorrect."
+        fi
+done
+
+
+#####################################################################################################################
+You can also loop while reading a variable to make the code simpler. Let's try the above example revised:
+
+#!/bin/sh
+# Guess the number game.  Version 2.0
+
+ANSWER=5          # The correct answer
+
+echo "Guess a number between 1 and 10. "
+
+while read NUM
+do
+        # Validate the input...
+        if [ "$NUM" -lt 1 ] || [ "$NUM" -gt 10 ]; then
+                echo "The number must be between 1 and 10! Guess again. "
+        elif [ "$NUM" -eq "$ANSWER" ]; then
+                echo "You got the answer correct!"
+                exit
+        else
+                echo "Incorrect, guess again. "
+        fi
+done
+
+
+#####################################################################################################################
+Another way to loop forever is to use the : in your while statement. Let's write a simple program that will print out how long it has been running until the user presses Ctrl+C to terminate the program.
+
+#!/bin/sh
+
+COUNTER=0
+
+while :
+do
+	sleep 1
+	COUNTER=`expr $COUNTER + 1`
+	echo "Program has been running for $COUNTER seconds..."
+done
+
+This program will loop until the user presses Ctrl+C. Notice that we use something else new here. The unix expr command is used to evaluate a mathematical expression. If you want to increment a variable, this is the command that you will use. done
+
+
+#####################################################################################################################
+
+
+for Loop
+
+The for statement is used when you want to loop through a list of items. The body of the loop is put between do and done. Let's say that we want to write a program that will validate numbers in a given list. These numbers can be loaded from a file, hard coded, or manually entered by the user. For our example, we will ask the user for a list of numbers separated with spaces. We will validate each number and make sure that it is between 1 and 100. The best way to write a program like this would be to use a for loop.
+
+#!/bin/sh
+# Validate numbers...
+
+echo "Please enter a list of numbers between 1 and 100. "
+read NUMBERS
+
+for NUM in $NUMBERS
+do
+	if [ "$NUM" -lt 1 ] || [ "$NUM" -gt 100 ]; then
+		echo "Invalid Number ($NUM) - Must be between 1 and 100!"
+	else
+		echo "$NUM is valid."
+	fi
+done
+
+
+#####################################################################################################################
+
+
+in/bash
+
+#!/bin/bash
+
+FILE='/home/a-saifm/users'
+
+YES=noor-users.tmp
+NO=NON-noor-users.tmp
+
+Y_FINAL=noor-users
+N_FINAL=NON-noor-users
+
+while read line
+do
+        id $line | grep noor-user >> $YES
+        id $line | grep -v noor-user >> $NO
+done < $FILE
+
+sort $YES >> $Y_FINAL
+sort $NO >> $N_FINAL
+
+rm $YES $NO
+
+
+#####################################################################################################################
+
+a-saifm@vmmgt01 ~]$ cat /tmp/users 
+cloama
+moondh
+obyrnenp
+nawasaas
+hassanns
+
+ bash$while read line;do id $line |grep -i adf-users;done < /tmp/users 
+
+
+#####################################################################################################################
+ /bin/bash          
+
+while IFS=: read user pass uid gid full home shell          
+do          
+echo -e "$full :\n\          
+ Pseudo : $user\n\          
+ UID :\t $uid\n\          
+ GID :\t $gid\n\          
+ Home :\t $home\n\          
+ Shell :\t $shell\n\n"          
+done < /etc/passwd
+
+
+#####################################################################################################################
+
+$ cat test6
+#!/bin/bash
+# iterate through all the files in a directory
+
+for file in /home/rich/test/*
+do
+
+   if [ -d “$file” ]
+   then
+      echo “$file is a directory”
+   elif [ -f “$file” ]
+   then
+      echo “$file is a file”
+   fi
+done
+$ ./test6
+/home/rich/test/dir1 is a directory
+/home/rich/test/myprog.c is a file
+/home/rich/test/myprog is a file
+/home/rich/test/myscript is a file
+/home/rich/test/newdir is a directory
+/home/rich/test/newfile is a file
+/home/rich/test/newfile2 is a file
+/home/rich/test/testdir is a directory
+/home/rich/test/testing is a file
+/home/rich/test/testprog is a file
+/home/rich/test/testprog.c is a file
+
+$
+
+#####################################################################################################################
+
+
+
+Program name: pingall.sh
+
+
+#!/bin/bash
+# Program name: pingall.sh
+date
+cat /path/to/list.txt |  while read output
+do
+    ping -c 1 "$output" > /dev/null
+    if [ $? -eq 0 ]; then
+    echo "node $output is up" 
+    else
+    echo "node $output is down"
+    fi
+done
+
+#############################################################################################################################
+
+
+echo she{ll,ot}
+
+echo ~+ ( to check the current working directory)
+
+echo "${!HO*}"
+HOME HOSTNAME HOSTTYPE
+
+echo "${VARNAME:=testing}"
+
+###########################################################################################################################
+
+#!/bin/bash
+set -e
+
+echo -e "Enter the file name: \c"
+read FILE
+
+while read -r MYFILES; do
+   echo "Users are : $MYFILES"
+done < "$FILE"
+
+
+
+
+#!/bin/bash
+file=/var/tmp/users.txt
+
+IFS='|'
+while read domain ip home ftpusername
+do
+        printf "*** Adding $domain to httpd.conf...\n"
+        printf "Setting virtual host using $ip ip...\n"
+        printf "DocumentRoot is set to $home to dir ...\n"
+#        printf "Adding ftp access for %s using %s ftp account...\n\n" $domain $ftpusername
+
+done < "$file"
+
+
+
+[root@LINUXSTACK tmp]# cat data.cvs 
+MOAMMED SAIF ,1985,KARNATAKA,12345,ALIVE
+
+
+!/bin/bash
+INPUT=data.cvs
+#OLDIFS=$IFS
+IFS=,G
+[ ! -f $INPUT] && { echo "$INPUT file not exist"; exit 99; }
+while read flname dob ssn tel status
+do
+        echo "Name : $flname"
+        echo "DOB : $dob"
+        echo "SSN : $ssn"
+        echo "Telephone : $tel"
+        echo "Status : $status"
+done < $INPUT
+#IFS=$OLDIFS
+
+output
+
+Name : MOAMMED SAIF 
+DOB : 1985
+SSN : KARNATAKA
+Telephone : 12345
+Status : ALIVE
+
+###########################################################################################################################
+
+#!/bin/bash
+# example of trapping events and limiting the shell stopping
+ 
+clear
+ 
+trap 'echo " - Please Press Q to Exit.."' SIGINT SIGTERM SIGTSTP
+ 
+while [ "$CHOICE" != "Q" ] && [ "$CHOICE" != "q" ]; do
+  echo "MAIN MENU"
+  echo "========="
+  echo "1) Choice One"
+  echo "2) Choice Two"
+  echo "3) Choice Three"
+  echo "Q) Quit/Exit"
+  echo ""
+  read CHOICE
+ 
+  clear
+done
+
+
+###########################################################################################################################
+
+
+
+for dfile in `ls Dockerfile.*`; do  osname=`echo $dfile | awk -F\. '{print $2}'`;echo building $osname;done
+#!/bin/bash
+
+# Stop & Remove All Dockers
+for inst in `docker ps -a | awk '{print $1}' | egrep -v 'd5c9e5830be8|CONTAINER'`
+   do
+      echo working with $inst
+      docker stop $inst
+      [ $? -ne 0 ] && echo something went wrong with $inst && continue
+      docker rm $inst
+      echo
+      echo
+ done
+
+# Build & Run All Dockers
+for dfile in `ls Dockerfile.*`
+ do
+      osname=`echo $dfile | awk -F\. '{print $2}'`
+      echo building $osname
+      docker build -t $osname --file $dfile .
+      [ $? -ne 0 ] && echo something went wrong && continue
+      echo running $osname
+      docker run -dit $osname /bin/bash
+      echo
+ done
+
+
+
+
+
+
+
+
+
+
+
+
+#!/bin/bash
+imageName=xx:my-image
+containerName=my-container
+
+docker build -t $imageName -f Dockerfile  .
+
+echo Delete old container...
+docker rm -f $containerName
+
+echo Run new container...
+docker run -d -p 5000:5000 --name $containerName $imageName
+
+
+#!/bin/bash
+imageName=xx:my-image
+containerName=my-container
+
+docker build -t $imageName -f Dockerfile  .
+
+containerRunning=$(docker inspect --format="{{ .State.Running }}" $containerName 2> /dev/null)
+
+if [ "$containerRunning" == "true" ]; then
+        docker stop $containerName
+        docker start $containerName
+else
+        docker run -d -p 5000:5000 --name $containerName $imageName
+fi
+
+###########################################################################################################################
+
+
+echo "abc_asdfjhdsf_dfksfj_12345678.csv" | awk -F'[_.]' '{print $4}'
+
+12345678
+
+###########################################################################################################################
+
+
+echo "abc_asdfjhdsf_dfksfj_12345678.csv" | awk -F"." '{print $1}' | awk -F"_" '{print $NF}'
+12345678
+
+
+a-saifm@vmmgt01 ~]$ cat /tmp/users |grep userid= |awk -F"=" '{print $2}'

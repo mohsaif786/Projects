@@ -1,0 +1,1140 @@
+
+————
+script for node validation
+——————
+
+
+#!/bin/bash
+
+NV=/usr/local/bin/NodeValidation.sh
+
+if [ "$(df -kh |awk '{print $6 }'|grep /scratch &>/dev/null; echo $?)" == 0 ]; then
+
+echo "already /scratch is mounted"
+
+elif [ "$($NV | grep 'Scratch' &>/dev/null; echo $?)" == 0 ]; then
+
+mmmount /scratch
+
+echo "scratch mounting...[Wait]:"
+
+else
+
+echo "mounting not sucess:"
+
+ fi
+
+if [ "$(service slurm status |grep -i 'running' &>/dev/null; echo $?)" == 0 ]; then
+
+echo "slurm service already running"
+
+elif [ "$($NV |grep -i 'SchedMem' &>/dev/null; echo $?)" == 0 ]; then
+
+service slurm start
+
+#else
+
+#echo "slurm not start success"
+
+fi
+————————————————————————————————————————————————————————————————————————————————————————
+
+———
+slurm user creation
+———
+
+
+
+#!/bin/bash -l
+#
+# This script to create user account for slurm
+# Created By NM
+# Version 0.1
+# Date 12/27/2015
+#
+
+if [ $# -le 0 ]
+then
+        echo "Invalid Syntax..."
+        echo "Please use $0 <userid> [<account>]"
+        exit 1
+fi
+userid=$1
+account=$2
+if [ "$account" = "" ]
+then
+        account=shared
+fi
+echo "Adding User $userid to $account Account"
+if [ `ssh ca001-mgt "/usr/bin/id -u $userid"` ]
+then
+        group=`ssh ca001-mgt "/usr/bin/id $userid -g"`
+        ssh ca001-mgt "mkdir /scratch/$userid;chown $userid:$group /scratch/$userid"
+        ssh slurm01-mgt "sacctmgr -i add user $userid account=$account defaultaccount=$account qos=default,short defaultqos=default"
+        ssh slurm01-mgt "sacctmgr -i add user $userid account=idle qos=default,short defaultqos=default"
+        # /adm/bin/ibrix/automount/noor2/sync_autohome_noor2.sh
+else
+        echo "Invalid Userid, Cannot Create the Slurm Account !!!"
+fi
+
+
+————————————————————————————————————————————————————————————————————————————————————————
+
+
+
+
+#!/bin/sh
+
+out=/tmp/mmgsw
+log=/var/log/mmgetstateall.log
+
+[ -d $out ] || mkdir -p $out > /dev/null
+rm -f $out/*
+
+> $out/sshck.bad.lst
+> $out/sshck.ok.lst
+
+if [ $# -gt 0 ] ; then
+  [ -x /opt/xcat/bin/nodels ] && nodels "$*" > /usr/local/etc/mmnodes.lst
+else
+  cp -f /usr/local/etc/mmnodes.all.lst /usr/local/etc/mmnodes.lst > /dev/null
+fi
+
+echo Checking ssh...
+
+cat /usr/local/etc/mmnodes.lst | while read node ; do
+  echo testing ssh to $node ... >> $log
+  ssh $node date >> $log  &
+  PIDNODE=`ps ax | grep ssh | grep $node | grep date | awk '{print $1}'`
+  echo $PIDNODE > ${out}/${node}
+[root@mgt01 bin]# clearw.outgsw.out"re-v "^$" | wc -l`6 >> $out/mmgs.lstv -e '-----' | tee -a $out/tmp.lst 2>&1 3>&1
+[root@mgt01 bin]# cat mmgsw.sh 
+#!/bin/sh
+
+out=/tmp/mmgsw
+log=/var/log/mmgetstateall.log
+
+[ -d $out ] || mkdir -p $out > /dev/null
+rm -f $out/*
+
+> $out/sshck.bad.lst
+> $out/sshck.ok.lst
+
+if [ $# -gt 0 ] ; then
+  [ -x /opt/xcat/bin/nodels ] && nodels "$*" > /usr/local/etc/mmnodes.lst
+else
+  cp -f /usr/local/etc/mmnodes.all.lst /usr/local/etc/mmnodes.lst > /dev/null
+fi
+
+echo Checking ssh...
+
+cat /usr/local/etc/mmnodes.lst | while read node ; do
+  echo testing ssh to $node ... >> $log
+  ssh $node date >> $log  &
+  PIDNODE=`ps ax | grep ssh | grep $node | grep date | awk '{print $1}'`
+  echo $PIDNODE > ${out}/${node}
+done
+
+cd $out
+
+echo Cleaning up...
+
+ls | grep -v ".lst" | while read file ; do
+  still_running=0
+  PID=`cat $file`
+#  echo testing if $file is still there...
+  ps ax | grep ssh | grep date | grep $file | grep -q $PID && still_running=1
+  if [ $still_running -gt 0 ] ; then
+    echo "$file is bad!!"  >> $log
+    echo $file >> $out/sshck.bad.lst
+    echo killing $PID  >> $log
+#    ps ax | grep $PID
+    kill $PID || kill -9 $PID
+  else
+    echo $file >> $out/sshck.ok.lst
+  fi
+
+done
+
+echo Checking mmgetstate...
+
+echo " Node number  Node name       Quorum  Nodes up  Total nodes  GPFS state  Remarks
+------------------------------------------------------------------------------------ "   > $out/mmgs.lst
+
+cat $out/sshck.ok.lst | while read node ; do
+  echo $node | grep -q fs && node=`echo ${node}-mgt`
+  #echo checking node $node ...
+  #echo mmgetstate -L -N $node 
+  ssh -f fs02 "mmgetstate -L -N $node"  | grep -v "Node number" | grep -v -e '-----' | tee -a $out/tmp.lst 2>&1 3>&1
+done
+echo; echo
+cat $out/tmp.lst | grep -v "^$" | sort -k 2 | sort -k 6 >> $out/mmgs.lst
+cat $out/mmgs.lst | more
+
+badnum=`cat $out/sshck.bad.lst | grep -v "^$" | wc -l`
+[ $badnum -gt 0 ] && { 
+  echo SSH problem on those nodes\:
+  cat $out/sshck.bad.lst | sort | more
+}
+
+
+echo "List saved as `pwd`/mmgsw.out"
+cp $out/mmgs.lst ./mmgsw.out
+
+
+————————————————————————————————————————————————————————————————————————————————————————
+
+
+
+[root@mgt01 bin]# cat testnetwork_on_given_node.sh
+#!/bin/bash
+#
+#
+#
+if [ $# -le 0 ]
+then
+	printf "\\nPlease Enter Hostname\n"
+	exit 1
+fi
+nodename=$1
+nodetype=`echo $nodename|cut -b1-2`
+for i in $(cat /usr/local/bin/fsnodes.txt)
+do
+	echo "#Perfoming test from $nodename to $i.."
+	#ssh $nodename "ping -w 10 -c 3 ${i}-ib" 
+	if [ "$nodetype"  = "gp" ]
+	then
+		ssh $nodename "ping -w10  -c3 ${i}-te" > /dev/null 2>&1
+	else
+		ssh $nodename "ping -w10  -c3 ${i}-ib" > /dev/null 2>&1
+	fi
+	if [ $? -gt 0 ]
+	then
+		echo "Ping test failed from $j to $i please do not start GPFS on this node"
+	fi	
+done
+#/usr/lpp/mmfs/bin/mmdsh -N all date
+
+
+————————————————————————————————————————————————————————————————————————————————————————
+
+[root@mgt01 bin]# cat testnetwork_on_impacated_nodes.sh
+#!/bin/bash
+#
+#
+#
+if [ $# -le 0 ]
+then
+	printf "\\nPlease Enter hostlist filename\n"
+	exit 1
+fi
+hostlist=$1
+if [ -f $hostlist ]
+then
+	for j in $(cat $hostlist)
+	do
+		for i in $(cat /usr/local/bin/fsnodes.txt)
+		do
+			echo "#Perfoming test from $j to $i.."
+			#ssh $j "ping -w 10 -c 3 ${i}-ib" 
+			ssh $j "ping -w 5 -c 3 ${i}-ib" > /dev/null 2>&1
+			if [ $? -gt 0 ]
+			then
+				echo "#Performing ping test from $j to $i: Failed,Please do not start GPFS on this node"
+			else
+				echo "#Performing ping test from $j to $i: Success.."
+			fi
+		done
+	done
+else
+	echo "$hostlist not found..."
+fi
+#/usr/lpp/mmfs/bin/mmdsh -N all date
+
+
+————————————————————————————————————————————————————————————————————————————————————————
+
+
+
+[root@mgt01 bin]# cat routecheck 
+#!/bin/bash
+#
+#
+for i in fs01 fs02 fs03 fs04 fs05 fs06 fs07 fs08 fs09 fs10 fs11 fs12 fs13 fs14 fs16
+do
+   echo "Perfoming traceroute test for $i.."
+   traceroute --tcp ${i}-mgt 
+   traceroute --tcp ${i}-ib
+done
+
+
+————————————————————————————————————————————————————————————————————————————————————————
+
+[root@mgt01 bin]# cat node_heartbeat.sh 
+#/bin/bash
+
+HOSTS=ci001-ci252,cn001-cn076,ct001-ct008,gpu01-gpu32,smp02,smp04
+#HOSTS=smp03,ct008
+ADDRESSEE="mohammed.naseemuddin@kaust.edu.sa waleed.alharbi@kaust.edu.sa rashid.abrar@kaust.edu.sa hendra.adiwidjaja@kaust.edu.sa"
+
+CMD1=`/opt/xcat/bin/xdsh $HOSTS -s -t 10 : 2>&1`
+sleep 15
+CMD2=`/opt/xcat/bin/xdsh $HOSTS -s -t 10 : 2>&1`
+
+DEADHOSTS=`echo -e "$CMD1\n$CMD2" | grep '^Error:' | grep -v SIGINT | sed 's/.*\b\([a-zA-Z]\+[0-9]\+\)\b.*/\1/' | sort | uniq -d`
+#DIFF=`echo "$DEADHOSTS" | diff - --to-file=/tmp/node_heartbeat | grep '^<' | sed 's/^< //' | grep '^[A-Za-z]' | wc -l`
+
+DIFF=''
+for i in $DEADHOSTS; do
+  grep -q $i /tmp/node_heartbeat
+  if [ $? -eq 1 ]; then DIFF="$i
+$DIFF"; fi
+done
+if [ x$DIFF != x'' ]; then
+  echo -n "$DIFF" >> /tmp/node_heartbeat
+  echo -e "Timeout host(s):\n$DIFF" | mailx -s "NOOR: timeout hosts" $ADDRESSEE
+fi
+
+————————————————————————————————————————————————————————————————————————————————————————
+
+[root@mgt01 bin]# cat pre_script
+#!/bin/bash 
+rc=0
+if [ ! "$(/bin/ps -ef|grep "/apps/admin/lsf/7.0/linux2.6-glibc2.3-x86_64/etc/lim"|grep -v grep)" ]
+then
+	echo "$DATE: lim is down"  
+	rc=1
+elif [ ! "$(/bin/ps -ef|grep "/apps/admin/lsf/7.0/linux2.6-glibc2.3-x86_64/etc/res"|grep -v grep)" ]
+then
+	echo "$DATE: res is down" 
+	rc=1
+elif [ ! "$(/bin/ps -ef|grep "/apps/admin/lsf/7.0/linux2.6-glibc2.3-x86_64/etc/sbatchd"|grep -v grep)" ]
+then
+	echo "$DATE: sbatchd is down" 
+	rc=1
+elif [ ! "$(/bin/ps -ef|grep "/apps/admin/lsf/7.0/linux2.6-glibc2.3-x86_64/etc/melim"|grep -v grep)" ]
+then
+	echo "$DATE: melim is down" 
+	rc=1
+elif [ ! "$(/bin/ps -ef|grep "/apps/admin/lsf/7.0/linux2.6-glibc2.3-x86_64/etc/pim"|grep -v grep)" ]
+then
+	echo "$DATE: pim is down" 
+	rc=1
+#elif [[  ! -d /home/lsfcheck  || ! -d /labs/lsfcheck  || ! -d /scratch/lsfcheck  ||  ! -d /apps_old/lsfcheck ]]
+elif [[  ! -d /home/lsfcheck  || ! -d /scratch/lsfcheck  ||  ! -d /apps_old/lsfcheck ]]
+then
+	echo "GPFS filesystems are not mounted.."
+	rc=1
+elif [ "$(ifconfig -a|grep ib0)" ]
+then
+	if [ "$(/usr/bin/ipath_control -i |grep "IB link not Active")" ]
+	then 
+		echo "IB is down"
+        	rc=1
+	fi	
+        hn=$(/bin/hostname)
+        LSF_ENVDIR="/apps/admin/lsf/conf"
+        BHOST="/apps/admin/lsf/7.0/linux2.6-glibc2.3-x86_64/bin/bhosts"
+        RUNJOB=$($BHOST $hn|awk '{print $6}'|grep -v RUN)
+        if [[ $RUNJOB -le 0 ]]
+        then
+                if [ "$(/usr/bin/ipathstats|grep "CtxtsOpen")" ]
+                then
+                        echo "Zombie/Defunct Threads might be holding IB contexts"
+                        rc=1
+                fi
+        fi
+fi
+echo "rc=$rc"
+exit $rc
+
+
+
+
+
+
+
+————————————————————————————————————————————————————————————————————————————————————————
+
+
+
+
+
+root@mgt01 bin]# cat adt.sh 
+#!/bin/bash  
+#
+# adt.sh:       Modifies secondary group membership in AD
+#
+# Version:      @(#) /usr/local/bin/adt.sh v1.0
+#
+# Author:       Stan Flachs
+#
+
+
+LOGPRIO=local6.info
+declare -x UPRINCIPAL ADTUSER ADTGROUP ADGROUP NEW_UUID
+declare -x KRB5CCNAME=FILE:/tmp/krb5cc_$$_
+
+NEW_UUID=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+NEW_UUID="$$-$NEW_UUID"
+
+echo  Start
+
+logit()
+{
+logger -t "ADTOOL SESSION=$NEW_UUID" -p $LOGPRIO UPRINCIPAL=$UPRINCIPAL SUDO_USER=$SUDO_USER -- $*
+}
+
+goaway()
+{
+  echo ""
+  echo ""
+  echo ""
+  echo "Exiting prematurely ........"
+  echo "!!!! The membership for User=$ADTUSER and Group=$ADTGROUP has NOT been altered  in AD !!!!"
+  logit "!!!! The membership for User=$ADTUSER and Group=$ADTGROUP has NOT been altered  in AD !!!!"  
+  echo "!!!! You need to obtain valid Kerberos ticket and run adtool command manually to modify data in AD!!!"
+  echo ""
+  echo ""
+  echo ""
+  exit 1
+  
+}
+
+checkargs()
+{
+[  $#  -ne 3 ] && { echo "adt: Wrong number of arguments. Usage: adt.sh <add|delete> <group> <username>";exit 1; }
+
+if [  "X$1"  != "Xadd" ] && [  "X$1"  != "Xdelete" ]
+then
+  echo ""
+  echo ""
+  echo ""
+  echo "adt: Requested action ($1) not recodnized. Usage:  adt.sh <add|delete> <group> <username>"
+  echo ""
+  echo ""
+  echo ""
+  exit 1
+fi
+}
+
+setspecialgroups()
+{
+ [ "X$ADTGROUP" =  "Xnoor-users" ]&&  { ADGROUP=noor-users; return 0; }
+ [ "X$ADTGROUP" =  "Xrc-admin" ]&&  { ADGROUP=rc-admin; return 0; }
+ [ "X$ADTGROUP" =  "Xrc" ]&&  { ADGROUP=rc;return 0; }
+
+ ADGROUP="rc-${ADTGROUP}"
+}
+
+checkgroupinAD()
+{
+if [ $(ldapsearch  -H ldap://wthdc1sr01.kaust.edu.sa -LLL -b "OU=UNIX RC,OU=IT GROUPS,OU=KAUST GROUP,DC=KAUST,DC=EDU,DC=SA" cn=$ADGROUP cn 2>/dev/null |grep ^cn:|wc -l) -eq 0 ] 
+then
+  echo ""
+  echo ""
+  echo ""
+  echo "adt: group $ADGROUP ($ADTGROUP) not found in AD"
+  logit "adt: group $ADGROUP ($ADTGROUP)  not found in AD"
+  echo ""
+  echo ""
+  echo ""
+  exit 1
+fi
+
+}
+
+checkitall()
+{
+checkargs $*
+
+ADTUSER=$3
+ADTGROUP=$2
+
+setspecialgroups
+
+  klist -s
+  rc=$?
+  [ ${rc}  -eq 0 ] && { UPRINCIPAL=$(klist -c|grep "^Default principal:"|awk '{print $3}'); checkgroupinAD; return 0; }
+
+it=3
+
+while [ ${it} -gt 0 ]
+do
+
+#if [ -z ${SUDO_USER} ]
+#then
+   echo ""
+   echo ""
+   echo ""
+   echo -n "Please enter your AD account name to obtain Kerberos ticket: "
+   read ADACCOUNTNAME
+   logit "Entered AD account ADACCOUNTNAME=$ADACCOUNTNAME"
+#   logit "SUDO_USER was not set, admin entered AD account ADACCOUNTNAME=$ADACCOUNTNAME"
+#else
+#   ADACCOUNTNAME=${SUDO_USER}
+#   logit "Detected SUDO_USER=$ADACCOUNTNAME"
+#fi
+
+####do
+
+
+  klist -s
+  rc=$?
+  if [ ${rc}  -ne 0 ]
+  then
+      
+      echo ""
+      echo "VALID Kerberos ticket not found, please enter password."
+      kinit ${ADACCOUNTNAME}
+      [ $? -eq 0 ] && { UPRINCIPAL=$(klist -c|grep "^Default principal:"|awk '{print $3}');return 0; }
+      echo ""
+      [ ${it} -eq 1 ] && break
+      echo "Something is wrong, do you want to try again? You still have $((${it}-1)) attempts left"
+      echo -n "Try it agan Y/N [Y]:"
+      read ans
+      [ "x${ans:-Y}" != "xY" ] && { logit "$ADACCOUNTNAME answered $ans to continue with kinit";goaway; }
+  else
+      UPRINCIPAL=$(klist -c|grep "^Default principal:"|awk '{print $3}')
+      checkgroupinAD
+      return 0
+ fi
+ it=$((${it}-1))
+done
+logit "kinit failed 3 times"
+goaway
+}
+
+addmember()
+{
+
+checkitall $*
+
+DSTRING=$(date +'%Y%m%d-%H%M%S')
+logit "executing backup:  /usr/local/bin/adtool -H ldap://wthdc1sr01.kaust.edu.sa -b \"OU=UNIX RC,OU=IT GROUPS,OU=KAUST GROUP,DC=KAUST,DC=EDU,DC=SA\" attributeget ${ADGROUP}  memberUid > /var/adtbackup/adtbackup-${DSTRING}-${ADGROUP}"
+ /usr/local/bin/adtool -H ldap://wthdc1sr01.kaust.edu.sa -b "OU=UNIX RC,OU=IT GROUPS,OU=KAUST GROUP,DC=KAUST,DC=EDU,DC=SA" attributeget ${ADGROUP}  memberUid > /var/adtbackup/adtbackup-${DSTRING}-${ADGROUP}
+logit "executing:  /usr/local/bin/adtool -H ldap://wthdc1sr01.kaust.edu.sa -b \"OU=UNIX RC,OU=IT GROUPS,OU=KAUST GROUP,DC=KAUST,DC=EDU,DC=SA\" attributeadd ${ADGROUP}  memberUid ${ADTUSER}"
+/usr/local/bin/adtool -H ldap://wthdc1sr01.kaust.edu.sa -b "OU=UNIX RC,OU=IT GROUPS,OU=KAUST GROUP,DC=KAUST,DC=EDU,DC=SA" attributeadd ${ADGROUP}  memberUid ${ADTUSER}
+RC=$?
+logit "excuting: RC=$RC"
+
+if [ ${RC} -eq 0 ]
+then
+  echo "AD configuration SUCCESSFULLY modified"
+else
+  echo "adtool returned non-zero exit  code ($RC) which indicates a problem.  AD configuration might not have been modified as expected. Please check"
+  exit 1
+fi
+  echo ""
+  echo ""
+  echo ""
+exit 0
+}
+
+deletemember()
+{
+
+checkitall $*
+
+DSTRING=$(date +'%Y%m%d-%H%M%S')
+logit "executing backup:  /usr/local/bin/adtool -H ldap://wthdc1sr01.kaust.edu.sa -b \"OU=UNIX RC,OU=IT GROUPS,OU=KAUST GROUP,DC=KAUST,DC=EDU,DC=SA\" attributeget ${ADGROUP}  memberUid > /var/adtbackup/adtbackup-${DSTRING}-${ADGROUP}"
+ /usr/local/bin/adtool -H ldap://wthdc1sr01.kaust.edu.sa -b "OU=UNIX RC,OU=IT GROUPS,OU=KAUST GROUP,DC=KAUST,DC=EDU,DC=SA" attributeget ${ADGROUP}  memberUid > /var/adtbackup/adtbackup-${DSTRING}-${ADGROUP}
+logit "executing:  /usr/local/bin/adtool -H ldap://wthdc1sr01.kaust.edu.sa -b \"OU=UNIX RC,OU=IT GROUPS,OU=KAUST GROUP,DC=KAUST,DC=EDU,DC=SA\" attributedelete ${ADGROUP}  memberUid ${ADTUSER}"
+/usr/local/bin/adtool -H ldap://wthdc1sr01.kaust.edu.sa -b "OU=UNIX RC,OU=IT GROUPS,OU=KAUST GROUP,DC=KAUST,DC=EDU,DC=SA" attributedelete ${ADGROUP}  memberUid ${ADTUSER}
+RC=$?
+logit "executing: RC=$RC"
+if [ ${RC} -eq 0 ]
+then
+   echo "AD configuration SUCCESSFULLY modified"
+else
+  echo "adtool returned non-zero exit code ($RC) which indicates a problem. AD configuration might not have been modified as desired. Please check"
+  exit 1
+fi
+  echo ""
+  echo ""
+  echo ""
+exit 0
+}
+
+### MAIN ####
+clear
+
+echo ""
+echo ""
+
+case "X${1}" in 
+"Xadd") 
+     addmember $* 
+     exit 0
+
+;;
+"Xdelete")
+     deletemember $* 
+     exit 0
+;;
+*)
+     echo ""
+     echo ""
+  echo ""
+  echo "adt: Requested action ($1) not recognized. Usage:  adt.sh <add|delete> <group> <username>"
+  echo ""
+  echo ""
+  echo ""
+  exit 1
+;;
+esac
+
+kdestroy
+
+————————————————————————————————————————————————————————————————————————————————————————
+[root@mgt01 adduser_noor]# cat syncpw.sh
+#!/bin/bash 
+
+SYNCDIR=/install/passwd
+DATE=`date "+%d%m%Y-%H%M"`
+# Stan 2014-09-25 remove ct002 after AD integration, 2014-09-20 removed mgt02 (noor-login2), ct001 (noor-login3)
+#NODES="fs11,fs19,fnt01,cn001-cn076,mgt02,ct001-ct008,ci001-ci142,ci144-ci209,ci211-ci252,fs17,lsf01"
+#NODES="fs11,fs19,fnt01,cn001-cn076,ct003-ct008,ci001-ci142,ci144-ci209,ci211-ci252,fs17,lsf01"
+NODES="fs11,fs19,fnt01,cn001-cn076,ct003-ct008,ci001-ci142,ci144-ci209,ci211-ci252,fs17,lsf01,fs18"
+#
+NODES2="smp05 smp06 smp07"
+ERROR_PW_FILE="/root/adduser_noor/logs/ERROR_PW_FILE_$DATE"
+
+######################
+# Modified by Stan
+#######################
+export PATH=$PATH:/usr/kerberos/bin/
+export KRB5CCNAME=/tmp/kcc_asyncpw_root_$$
+kinit -k -t /etc/krb5.keytab 'host/noor-login.kaust.edu.sa@KAUST.EDU.SA'
+
+./ad2pass.pl $SYNCDIR
+RC1=$?
+./ad2group.pl $SYNCDIR
+RC2=$?
+RC=$((${RC1}+${RC2}))
+[ ${RC} -ne 0 ] && { echo "Problem with ad2pass.pl (rc=$RC1) or ad2group.pl (rc=$RC2), exiting...." ; exit 1; }
+
+kdestroy
+######################
+
+#
+pwlines=`wc -l  $SYNCDIR/passwd.cluster|awk '{print $1}'`
+shadow=`wc -l  $SYNCDIR/shadow.cluster|awk '{print $1}'`
+gshadow=`wc -l  $SYNCDIR/gshadow.cluster|awk '{print $1}'`
+group=`wc -l  $SYNCDIR/group.cluster|awk '{print $1}'`
+#
+echo " "
+echo "pwlines=$pwlines,shadow=$shadow,gshadow=$gshadow,group=$group"
+if [ $pwlines -ge  400  ] &&  [ $shadow -ge 0  ] &&  [ $gshadow -ge  0 ]  &&  [ $group -ge  0 ]
+then
+	echo "Backing up passwd files...."
+	scp fnt01:/etc/passwd.cluster /adm/archive/passwd_bk/fnt01/passwd.cluster_$DATE
+	scp fnt01:/etc/group.cluster /adm/archive/passwd_bk/fnt01/group.cluster_$DATE
+	scp fnt01:/etc/shadow.cluster /adm/archive/passwd_bk/fnt01/shadow.cluster_$DATE
+	scp fnt01:/etc/gshadow.cluster /adm/archive/passwd_bk/fnt01/gshadow.cluster_$DATE
+	#
+	scp ci100:/etc/passwd.cluster /adm/archive/passwd_bk/ci100/passwd.cluster_$DATE
+	scp ci100:/etc/group.cluster /adm/archive/passwd_bk/ci100/group.cluster_$DATE
+	scp ci100:/etc/shadow.cluster /adm/archive/passwd_bk/ci100/shadow.cluster_$DATE
+	scp ci100:/etc/gshadow.cluster /adm/archive/passwd_bk/ci100/gshadow.cluster_$DATE
+	#	
+	#
+	echo "Backup is finished.."
+	echo " "
+	echo  "Passwd Sync is  in progress..."
+	/opt/xcat/bin/pscp -o ConnectTimeout=5 -o ConnectionAttempts=1 $SYNCDIR/*.cluster $NODES:/etc/  2>> $ERROR_PW_FILE
+	/opt/xcat/bin/xdsh $NODES -t5 'if [ -s /etc/passwd.local ]; then cat /etc/passwd.local /etc/passwd.cluster > /etc/passwd;fi'  2>>$ERROR_PW_FILE &
+	/opt/xcat/bin/xdsh $NODES -t5 'if [ -s /etc/group.local ]; then cat /etc/group.local /etc/group.cluster > /etc/group;fi' 2>>$ERROR_PW_FILE   &
+	/opt/xcat/bin/xdsh $NODES -t5 'if [ -s /etc/shadow.local ]; then cat /etc/shadow.local /etc/shadow.cluster > /etc/shadow;fi' 2>>$ERROR_PW_FILE &
+	/opt/xcat/bin/xdsh $NODES -t5 'if [ -s /etc/gshadow.local ]; then cat /etc/gshadow.local /etc/gshadow.cluster > /etc/gshadow;fi' 2>>$ERROR_PW_FILE &
+        for i in $NODES2; do
+          echo scp $SYNCDIR/*.cluster $i:/etc/
+          scp $SYNCDIR/*.cluster $i:/etc/ 2>> $ERROR_PW_FILE
+          ssh $i "if [ -s /etc/passwd.local ] &&  [ -s /etc/shadow.local ] && [ -s /etc/group.local ] && [ -s /etc/gshadow.local ]; then cat /etc/passwd.local /etc/passwd.cluster > /etc/passwd; cat /etc/group.local /etc/group.cluster > /etc/group; cat /etc/shadow.local /etc/shadow.cluster > /etc/shadow; cat /etc/gshadow.local /etc/gshadow.cluster > /etc/gshadow;  fi" 
+        done
+	echo " "
+	echo " "
+	echo "Sync passwd is completed on Noor please check this file for the errors $ERROR_PW_FILE "
+	echo " " 
+	cat $ERROR_PW_FILE
+	echo " " 
+else
+	echo "Sync passwd cannot be run  passwd.cluster has error.."
+fi
+echo " "
+#echo "Passwd Sync for SMC cluster started.."
+#/root/adduser_noor/syncpw_smc_cluster.sh	
+#echo " "
+#echo "Password Sync for SMC cluster is completed.."
+
+————————————————————————————————————————————————————————————————————————————————————————
+
+[root@mgt01 adduser_noor]# cat  adduser_noor_fnt01.sh
+#!/bin/bash
+if [[  $# -le 0 ]] 
+then 
+   echo " "
+   echo "Invalid Syntax..."
+   echo "Usage : adduser_noor.sh  <valid userid>"
+   echo " "
+   exit 1
+fi
+USERID=$1
+NFSDIR=ibxhome01
+IBXServer=ibxfs01
+NFSServer=ibxfs01-ib
+ScratchServer=cn074
+LoginNode=noor-login2
+HomeServer=fs19-mgt
+SkelServer=fnt01
+DATE=`date "+%d%m%Y-%H%M"`
+ERROR_FILE_ADDUSER="/root/adduser_noor/logs/ERROR_FILE_ADDUSER_$DATE"
+gid=`ssh $LoginNode "id -g $USERID"`
+uid=`ssh $LoginNode "id -u $USERID"`
+echo "gid=$gid"
+if [ ! -z $gid ] 
+then
+	echo "Creating home on $NFSDIR/$USERID dir ..."
+        echo $HomeServer mkdir /$NFSDIR/$USERID
+	ssh $HomeServer mkdir /$NFSDIR/$USERID 2>&1 | tee -a  $ERROR_FILE_ADDUSER
+	ssh $HomeServer mkdir /$NFSDIR/$USERID/.ssh 2>&1 | tee -a  $ERROR_FILE_ADDUSER
+	echo "Copying /etc/skel file .."
+        echo ssh $SkelServer scp /etc/skel/.profile $HomeServer:/$NFSDIR/$USERI
+	ssh $SkelServer scp /etc/skel/.bash_profile $HomeServer:/$NFSDIR/$USERID 2>&1 | tee -a  $ERROR_FILE_ADDUSE        
+        ssh $SkelServer scp /etc/skel/.bashrc $HomeServer:/$NFSDIR/$USERID 2>&1 | tee -a  $ERROR_FILE_ADDUSE
+	ssh $SkelServer scp /etc/skel/.profile $HomeServer:/$NFSDIR/$USERID 2>&1 | tee -a  $ERROR_FILE_ADDUSE
+	ssh $SkelServer scp /etc/skel/ssh_config $HomeServer:/$NFSDIR/$USERID/.ssh/config 2>&1 | tee -a  $ERROR_FILE_ADDUSE
+	sleep 3
+	echo " Changing the /$NFSDIR permission..."
+        echo ssh $HomeServer chmod 700 /$NFSDIR/$USERID
+	ssh $HomeServer chmod 700 /$NFSDIR/$USERID 2>&1|tee -a $ERROR_FILE_ADDUSER
+	echo "Creating /scratch dir "
+	#echo "ssh $ScratchServer mkdir /scratch/$USERID" 
+	ssh $ScratchServer mkdir /scratch/$USERID 2>&1 |tee -a  $ERROR_FILE_ADDUSER
+	echo " Changing the scratch permission $ScratchServer chmod 700 /scratch/$uid.."
+	ssh $ScratchServer chmod 700 /scratch/$USERID 2>&1 |tee -a $ERROR_FILE_ADDUSER
+	echo " Changing ownership and  permission $HomeServer chown $uid:$gid /$NFSDIR/$USERID.."
+	echo ssh $HomeServer chown -R $uid:$gid /$NFSDIR/$USERID /$NFSDIR/$USERID/.profile
+	ssh $HomeServer chown $USERID:$gid -R /$NFSDIR/$USERID 2>&1 |tee -a $ERROR_FILE_ADDUSER
+        ssh_keys="ssh-keygen -t rsa -N '' -f /$NFSDIR/$USERID/.ssh/id_rsa"
+        echo $ssh_keys
+        ssh $HomeServer "su - $USERID -c \"$ssh_keys\"" 2>&1 | tee -a  $ERROR_FILE_ADDUSER
+        ssh $HomeServer "su - $USERID -c \"cp /$NFSDIR/$USERID/.ssh/id_rsa.pub /$NFSDIR/$USERID/.ssh/authorized_keys\"" 2>&1 | tee -a  $ERROR_FILE_ADDUSER
+	echo " Changing ownership and  permission $ScratchServer chown $uid:$gid /scratch/$USERID.."
+	ssh $ScratchServer chown $uid:$gid /scratch/$USERID 2>&1 |tee -a $ERROR_FILE_ADDUSER
+else
+	echo 
+	echo "Group Id didn't find, if this is ID sync issue,  please wait and run again this script Exiting.."
+	echo 
+	exit 1
+	echo " Changing ownership..." 
+	echo " Changing ownership and  permission $HomeServer chown $USERID:$gid /$NFSDIR/$USERID.."
+	ssh $HomeServer chown $uid /$NFSDIR/$USERID /$NFSDIR/$USERID/.profile 2>&1 |tee -a $ERROR_FILE_ADDUSER
+	echo " Changing ownership and  permission $ScratchServer chown $USERID:$gid /scratch/$USERID.."
+	ssh $ScratchServer chown $uid /scratch/$USERID 2>&1 |tee -a $ERROR_FILE_ADDUSER
+fi
+#ssh $HomeServer ln -s /$NFSDIR/$USERID /home/$USERID
+echo "User $USERID created on Noor1"
+echo "Creating auto.home for login nodes, compute nodes.."
+AUTOMOUNTDIR="/ibxadm/adm/bin/ibrix/automount/noor1"
+BK_AUTOMOUNTDIR="/ibxadm/adm/bin/ibrix/automount/noor1/bk"
+MMDDYYHH=`/bin/date "+%m%d%y-%H"`
+#
+#if  grep -q "$USERID" $AUTOMOUNTDIR/auto.home_loginodes  
+if grep $USERID $AUTOMOUNTDIR/auto.home_loginodes|awk '{print $1}'|grep -q -x $USERID
+then
+	echo "User $USERID already exist under /etc/auto.home.."
+else
+	/bin/cp $AUTOMOUNTDIR/auto.home_loginodes $BK_AUTOMOUNTDIR/auto.home_loginodes_$MMDDYYHH
+	/bin/cp $AUTOMOUNTDIR/auto.home_computenodes $BK_AUTOMOUNTDIR/auto.home_computenodes_$MMDDYYHH
+	echo "$USERID -rw,-fstype=nfs :/$NFSDIR/$USERID" >> $AUTOMOUNTDIR/auto.home_loginodes 2>> $ERROR_FILE_ADDUSER 
+	echo "$USERID -fstype=nfs,rw,proto=tcp,nfsvers=3,wsize=32768,rsize=32768,intr $NFSServer:/ibxhome/$USERID" >> $AUTOMOUNTDIR/auto.home_computenodes 2>> $ERROR_FILE_ADDUSER
+fi
+echo " "
+echo "Do you like to sync auto.home Noor1 ... y/n ?"
+echo " "
+ans="n"
+read ans
+if [[ $ans == "Y" || $ans == "y" ]]; then
+        echo "gonna do it"
+	echo "Syncing automount on Noor login nodes..."
+	scp -o ConnectTimeout=5 -o ConnectionAttempts=1 $AUTOMOUNTDIR/auto.home_computenodes mgt02-mgt:/etc/auto.home 2>> $ERROR_FILE_ADDUSER
+	scp -o ConnectTimeout=5 -o ConnectionAttempts=1 $AUTOMOUNTDIR/auto.home_loginodes mgt04-mgt:/etc/auto.home 2>> $ERROR_FILE_ADDUSER
+	scp -o ConnectTimeout=5 -o ConnectionAttempts=1 $AUTOMOUNTDIR/auto.home_loginodes ct001:/etc/auto.home 2>> $ERROR_FILE_ADDUSER
+	echo " "
+	echo "Syncing automount on Noor compute nodes..."
+	sleep 2
+	/opt/xcat/bin/pscp -o ConnectTimeout=5  -o ConnectionAttempts=1 $AUTOMOUNTDIR/auto.home_computenodes ci001-ci143,ci145-ci204,ci206-ci209,ci211-ci252,cn001-cn076,smp05,smp06,smp07,ct002,ct003,ct004,ct005,ct006,ct007,ct008:/etc/auto.home 2>> $ERROR_FILE_ADDUSER
+	echo " "
+	echo "Reload/Restart autofs on Noor cluster..."
+	/opt/xcat/bin/xdsh mgt02,mgt04,ct001 -t5  "service autofs restart" 2>> $ERROR_FILE_ADDUSER
+	/opt/xcat/bin/xdsh ci001-ci143,ci145-ci204,ci206-ci209,ci211-ci252,cn001-cn076,smp05,smp06,smp07,ct002,ct003,ct004,ct005,ct006,ct007,ct008 -t5 "service autofs reload" 2>> $ERROR_FILE_ADDUSER
+	echo "auto.home sync is completed on Noor1 is Done..."
+	echo "you can check  $ERROR_FILE_ADDUSER file for error"
+	cat  $ERROR_FILE_ADDUSER
+else
+	echo "not gonna do it"
+	echo " "
+	echo "You can run \"sync_auto.home_on_noor\" later if you want just sync the auto.home.."
+	echo " "
+fi
+echo " Userid creation is done on Noor1.."
+echo " Adding user to SMC cluster /home and /scratch"
+echo " "
+echo "Run this on vmmgt01: /root/adduser_noor/addusers_smc.sh $USERID $gid $uid $IBXServer"
+echo "Adding user user to Noor2 Cluster "
+echo "Run this on vmmgt01: /root/adduser_noor/addusers_noor2.sh $USERID $gid $uid $IBXServer"
+echo  "Completed! on All the Clusters "
+
+
+
+
+————————————————————————————————————————————————————————————————————————————————————————
+
+[root@vmmgt01 a-saifm]# cat /root/adduser_noor/addusers_noor2.sh
+#!/bin/bash
+#
+# script: addusers_noor2.sh
+# description : create home and scratch dir for noor2 cluster on fs23 
+# By:   Naseem Mohammed
+#
+#
+if [[  $# -le 0 ]] 
+then 
+   echo " "  echo "Usage : adduser_noor.sh  <valid userid>"
+   echo " "
+   exit 1
+fi
+USERID=$1
+GROUP=$2
+uid=$3
+IBXServer=$4
+SCRATCHDIR="/scratch"
+NFSServer=$IBXServer
+NFSServerIB=${IBXServer}-ib
+echo " I am in Noor2 Script USERID=$USERID,GROUP=$GROUP,uid=$uid,NFSServerIB=$NFSServerIB, NFSServer=$NFSServer,ScratchServer=$ScratchServer"
+echo "Creating auto.home for Noor2 login nodes & compute nodes.."
+AUTOMOUNTDIR="/ibxadm/adm/bin/ibrix/automount/noor2"
+BK_AUTOMOUNTDIR="/ibxadm/adm/bin/ibrix/automount/noor2/bk"
+MMDDYYHH=`/bin/date "+%m%d%y-%H"`
+echo " "
+/bin/cp $AUTOMOUNTDIR/auto.home_noor2_loginnodes $BK_AUTOMOUNTDIR/auto.home_noor2_loginnodes_$MMDDYYHH
+/bin/cp $AUTOMOUNTDIR/auto.home_noor2_computenodes $BK_AUTOMOUNTDIR/auto.home__noor2_computenodes_$MMDDYYHH
+echo " "
+#if grep -q "$USERID" $AUTOMOUNTDIR/auto.home_noor2_loginnodes  
+if grep $USERID $AUTOMOUNTDIR/auto.home_noor2_loginnodes|awk '{print $1}'|grep -q -x $USERID
+then
+	echo "User $USERID already exist under /etc/auto.home.."
+else
+	echo "$USERID -fstype=nfs,rw,proto=tcp,nfsvers=3,wsize=32768,rsize=32768,intr,retry=100 $NFSServer:/ibxhome/$USERID" >> $AUTOMOUNTDIR/auto.home_noor2_loginnodes
+	echo "$USERID -fstype=nfs,rw,proto=tcp,nfsvers=3,wsize=32768,rsize=32768,intr,retry=100 $NFSServerIB:/ibxhome/$USERID" >> $AUTOMOUNTDIR/auto.home_noor2_computenodes
+fi
+echo " "
+echo "Creating Scratch dir on Noor2 Clusters Please Wait.."
+echo "Running  \"/root/add_users/sync_autohome_noor2.sh $USERID $GROUP $uid\""
+/root/add_users/sync_autohome_noor2.sh $USERID $GROUP $uid
+echo " "
+echo "Userid Creation is Done , Make sure it works , su $USERID and submit test job..."
+
+
+————————————————————————————————————————————————————————————————————————————————————————
+root@vmmgt01 a-saifm]# cat /root/add_users/sync_autohome_noor2.sh
+USERID=$1
+GROUP=$2
+uid=$3
+if [[ `ssh ca001-mgt date` ]]
+then
+        ScratchServer="ca001-mgt"
+else
+        ScratchServer="ca002-mgt"
+fi
+echo "ssh $ScratchServer  \"mkdir /scratch/$USERID\""
+ssh $ScratchServer  "mkdir /scratch/$USERID"
+echo "ssh $ScratchServer  \"chown $uid:$GROUP  /scratch/$USERID\""
+ssh $ScratchServer  "chown $uid:$GROUP  /scratch/$USERID;chmod  750 /scratch/$USERID"
+echo " "
+echo "Do you like to sync auto.home on Noor2 Clusters  Now ... y/n ?"
+echo " "
+read ans
+if [[ $ans == "N" || $ans == "n" ]]; then
+        echo "not gonna do it"
+else
+        echo "gonna do it"
+	echo "Syncing.. auto.home for Noor2 Clusters Please Wait.."
+	/adm/bin/ibrix/automount/noor2/sync_autohome_noor2.sh
+        echo " "
+        echo "Userid Creation is Done , Make sure it works , su $USERID and submit test job..."
+fi
+
+###############################unmounting mounted user home directory###################
+
+!/bin/bash
+#
+# Script to unmount home from Noor2 if it is idle
+# Naseem
+# This script is temp until autofs timeout is fixed
+#
+for i in $(df -h|grep ibxhome|awk -F \/ '{print $3}'|awk '{print $1}')
+do
+        echo "mounted home dir =$i"
+        umount /home/$i
+done
+
+
+
+#########################################################################################################
+
+Dump MySQL database every hour using cron
+
+date Command Syntax
+
+The syntax is as follows for GNU/date:
+
+date +"FORMAT"
+
+To display date in MONTH-DD-YYYY format use the date command as follows:
+$ date +"%b-%d-%y"
+
+Sample outputs:
+Feb-05-06
+
+Where, FORMAT can be any one of the following:
+
+    %a : Abbreviated weekday name (Sun..Sat)
+    %b : Abbreviated month name (Jan..Dec)
+    %B : Full month name, variable length (January..December)
+    %d : Day of month (01..31)
+    %e : Day of month, blank padded ( 1..31)
+    %m : Month (01..12)
+    %Y : Year
+    %d : Day of month (e.g, 01)
+    %H : 24 hour format (00..23)
+    %I : 12 hour format (01..12)
+    %j : day of year (001..366)
+    %D : date; same as %m/%d/%y
+    %F : full date; same as %Y-%m-%d (a good format for sorting filename)
+
+Get the date in YYYY-mm-dd format
+
+NOW=$(date +"%Y-%m-%d")
+
+OR
+
+NOW=$(date +"%F")
+
+To create a file with date in filename, enter:
+
+LOGFILE="log-$NOW.log"
+
+To display filename, enter:
+
+echo "$LOGFILE"
+
+Sample Shell Script
+
+#!/bin/sh
+# Dump MySQL database every hour using cron
+# Author: Vivek Gite 
+# See for more info: http://www.cyberciti.biz/tips/shell-scripting-creating-reportlog-file-names-with-date-in-filename.html
+# ---------------------------------------------------------------------------------------------------------
+ 
+## date format ##
+NOW=$(date +"%F")
+NOWT=$(date +"%T")
+ 
+## Backup path ##
+BAK="/nfs/backup/mysql/$NOW"
+ 
+## Login info ##
+MUSER="madmin"
+MPASS="PASSWORD"
+MHOST="127.0.0.1"
+ 
+## Binary path ##
+MYSQL="/usr/bin/mysql"
+MYSQLDUMP="/usr/bin/mysqldump"
+GZIP="/bin/gzip"
+ 
+## Get database list ##
+DBS="$($MYSQL -u $MUSER -h $MHOST -p$MPASS -Bse 'show databases')"
+ 
+## Use shell loop to backup each db ##
+for db in $DBS
+do
+ FILE="$BAK/mysql-$db-$NOWT.gz"
+ echo "$MYSQLDUMP -u $MUSER -h $MHOST -p$MPASS $db | $GZIP -9 > $FILE"
+done
+
+
+############################################################
+SSH: Rotate backup shell script to remove directories (old backup files)
+by Vivek Gite on October 9, 2007 last updated September 23, 2008
+in Backup, Data recovery, Howto, RedHat/Fedora Linux, Security, Shell scripting, Sys admin, Tips, Ubuntu Linux, UNIX
+
+Most time you have a limited space on the remote SFTP/ SSH backup server. Here is the script that periodically cleanup old backup files from the server i.e it will remove old directories.
+
+Requirements
+
+Script will automatically calculate date from today’s date. By default it will keep only last 7 days backup on server. You can easily increase / decrease this limit. In order to run script you must meet the following criteria:
+
+    Remote SSH server with rm command execution permission
+    SSH Keys for password less login (see how to setup RSA / DSA keys for password less login)
+    Accurate date and time on local system (see how to synchronize clock using ntpdate ntp client)
+    Remote backup directory must be in dd-mm-yyyy or mm-dd-yyyy format. For example daily mysql backup should be stored in /mysql/mm-dd-yyyy format.
+
+Sample Script Usage
+
+Run the script as follows:
+./rot.backup.sh 7 /mysql "rm -rf"
+
+Where,
+
+    7 : Remove last 7 days files
+    /mysql : Base directory to clean up. If todays date is 9/Oct/2007, it will remove last 7 days directory /mysql/02-10-2007, /mysql/01-10-2007, …. /mysql/26-09-2007, /mysql/25-09-2007. It means script will only keep last 7 days backup on remote sftp / ssh server.
+    rm -rf : Command to run on directory structure
+
+Sample Shell Script
+
+Install following script:
+
+#!/bin/bash
+if [ "$#" == "0" ];then
+  echo "$0 upper-limit path {command}"
+  exit 1
+   echo "Invalid Syntax..."
+
+fi
+### SSH Server setup ###
+SSH_USER="vivek"
+SSH_SERVER="nas.nixcraft.in"
+START=7
+DIR_FORMAT="%d-%m-%Y" # DD-MM-YYYY format
+#DIR_FORMAT="%m-%d-%Y" #MM-DD-YYYY format
+## do not edit below ##
+LIMIT=$( expr $START + $1 )
+## default CMD ##
+CMD="ls"
+SSH_PATH="."
+[ "$3" != "" ] && CMD="$3" || :
+[ "$2" != "" ] && SSH_PATH="$2" || :
+DAYS=$(for d in $(seq $START $LIMIT);do date --date="$d days ago" +"${DIR_FORMAT}"; done)
+for d in $DAYS
+do
+  ssh ${SSH_USER}@${SSH_SERVER} ${CMD} ${SSH_PATH}/$d
+done
+
+
+############################################################
+
+
+#!/bin/bash
+
+FILE='/home/a-saifm/users'
+
+YES=noor-users.tmp
+NO=NON-noor-users.tmp
+
+Y_FINAL=noor-users
+N_FINAL=NON-noor-users
+
+while read line
+do
+	id $line | grep noor-user >> $YES
+	id $line | grep -v noor-user >> $NO
+done < $FILE
+
+sort $YES >> $Y_FINAL
+sort $NO >> $N_FINAL
+
+rm $YES $NO
+
+
+
+############################################################
+
+[root@ca002 SmartArray]# vi SmartArrayUpgrade.sh 
+
+echo "Checking firmware ..."
+
+        rpm -qa | grep "kmod-hpsa-3.4.12"
+        if [ $? -eq 1 ]; then
+                yum update $RPM/kmod-hpsa-3.4.12-110.rhel6u5.x86_64.rpm -y
+#               reboot
+                echo "Kernel module HPSA installed ... [DONE]" | tee /tmp/reboot1
+                sleep 10
+        else
+                touch /tmp/reboot1
+        fi
+
+fi
+
+if [ -f /tmp/reboot1 ] ; then
+        echo "Validation after 1st reboot"
+        rpm -qa | grep hp-firmware-smartarray
+
+        if [ $? -eq 1 ]; then
+                echo "Installing SmartArray firmware..."
+                yum localinstall $RPM/hp-firmware-smartarray-14ef73e580-6.64-2.i386.rpm -y
+                rm /tmp/reboot1
+                echo "SmartArray firmware installed ... [DONE]" | tee /tmp/reboot2
+                yes | sh /usr/lib/i386-linux-gnu/hp-scexe-compat/CP027483.scexe
+                exit
+        else
+                touch /tmp/reboot2
+        fi
+
+fi
+
+if [ -f /tmp/reboot2 ] ; then
+
+        echo "Validation after 2nd reboot"
+        rpm -qa | grep hp-firmware-system
+        if [ $? -eq 1 ]; then
+                echo "Installing BIOS firmware..."
+                rpm -Uvh $RPM/hp-firmware-system-a20-2014.09.03-3.i386.rpm
+                rm /tmp/reboot2
+                echo "BIOS firmware installed ... [DONE]" | tee /tmp/reboot3
+                yes | sh /usr/lib/i386-linux-gnu/hp-firmware-system-a20-2014.09.03-3/cpqsetup
+                exit
+        else
+                touch /tmp/reboot3
+        fi
+fi
+
+if [ -f /tmp/reboot3 ] ; then
+        echo "Validation after 3rd reboot"
+        echo "Installing ILO firmware..."
+        yes | sh /scratch/a-zahranha/SmartArray/CP026424.scexe
+        echo "iLO firmware upgrade finished ... [DONE]" | tee /tmp/reboot4
+fi
+
+
+######################################################################################
+
+cho "Setting up IP addres..."
+
+IP=`grep $HOSTNAME-ib /etc/hosts|awk '{print $1}' `
+cat > /etc/sysconfig/network-scripts/ifcfg-ib0 <<EOF
+DEVICE=ib0
+BOOTPROTO=static
+ONBOOT=yes
+NETMASK=255.255.0.0
+IPADDR=$IP
+CONNECTED_MODE=yes
+EOF
+sleep 1
+ifdown ib0 ; ifup ib0
+sleep 5
+/etc/init.d/stg-gw-check restart
+sleep 1
+/etc/init.d/stg-gw-check restart
+
+######################################################################################
+
+
+
+!/bin/bash
+DATE=`date "+%d%m%y"`
+output=/root/rysnc_output_lthnoorapps_opt_$DATE
+echo "Running.. rsync "
+rsync -av --delete --progress --exclude 'lsfadmin' /apps_fs21/linuxopt/ lthnoorapps:/wslinuxopt  >> $output 2>&1
