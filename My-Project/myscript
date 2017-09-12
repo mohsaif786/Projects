@@ -1,0 +1,15 @@
+#!/usr/bin/python
+import subprocess
+def active_process(lookup_user, lookup_cmd):
+    process_running=0
+    process_searched=0
+    for line in subprocess.check_output("ps -ef",shell=True).splitlines():
+        user = line.split()[0]
+        if lookup_user == user:
+            process_running+=1
+            if lookup_cmd in line:
+                process_searched=+1
+    return process_running,process_searched
+
+procs_total,process_searched = active_process('root', 'linuxsta+')
+print procs_total,process_searched
